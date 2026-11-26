@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watcher.net</title>
+<meta name="theme-color" content="#1A1240">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Watcher">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="icon" href="/static/icons/favicon.ico" sizes="48x48">
+<link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<style>
+  :root { --bg:#f6f6f4; --card:#fff; --text:#1d1d1b; --muted:#6b6b66; --accent:#2f6fde; --err:#c0392b; --ok:#1e8449; --line:#deded9; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151514; --card:#1f1f1d; --text:#ececea; --muted:#9a9a94; --accent:#6c9cf0; --err:#ef6b5b; --ok:#58c482; --line:#33332f; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); display:grid; place-items:center; min-height:100vh; padding:16px; }
+  main { width:100%; max-width:560px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:28px; }
+  h1 { margin:0 0 4px; font-size:1.4rem; }
+  p.sub { margin:0 0 20px; color:var(--muted); font-size:.92rem; }
+  input[type=url] { width:100%; padding:12px; font-size:1rem; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); }
+  .row { display:flex; gap:10px; margin:14px 0; }
+  .row label { flex:1; border:1px solid var(--line); border-radius:8px; padding:10px; text-align:center; cursor:pointer; }
+  .row input { display:none; }
+  .row input:checked + span { color:var(--accent); font-weight:600; }
+  .row label:has(input:checked) { border-color:var(--accent); }
+  button { width:100%; padding:12px; font-size:1rem; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #status { margin-top:16px; font-size:.95rem; min-height:1.5em; word-break:break-word; }
+  .err { color:var(--err); } .ok { color:var(--ok); }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1 style="display:flex;align-items:center;gap:10px"><img src="/static/icons/icon.svg" alt="" width="36" height="36">Watcher.net</h1>
+  <p class="sub">YouTube, Instagram Reels oder TikTok Link einfügen.</p>
+  <form id="f">
+    <input type="url" id="url" placeholder="https://..." required autofocus>
+    <div class="row">
+      <label><input type="radio" name="fmt" value="mp3"><span>MP3 (Audio)</span></label>
+      <label><input type="radio" name="fmt" value="mp4" checked><span>MP4 (Video)</span></label>
+    </div>
+    <button id="b">Herunterladen</button>
+  </form>
+  <div id="status"></div>
+</main>
+<script>
+const f = document.getElementById('f'), b = document.getElementById('b'), s = document.getElementById('status');
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  b.disabled = true; s.className = ''; s.textContent = 'Lädt herunter, das kann etwas dauern ...';
+  try {
+    const r = await fetch('/api/download', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ url: document.getElementById('url').value, format: f.fmt.value }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Fehler');
+    s.className = 'ok';
+    s.innerHTML = '';
+    s.append('Fertig: ' + d.name + ' (gespeichert in ' + d.folder + ') ');
+    const a = document.createElement('a'); a.href = d.file; a.textContent = 'Datei öffnen'; s.append(a);
+  } catch (err) { s.className = 'err'; s.textContent = err.message; }
+  finally { b.disabled = false; }
+});
+</script>
+</body>
+</html>
