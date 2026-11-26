@@ -6,6 +6,7 @@ und ffmpeg zum Zusammenfuegen und Umwandeln.
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -21,6 +22,18 @@ DEFAULT_OUT = Path.home() / "Downloads" / "Watcher.net"
 
 class DownloadError(Exception):
     pass
+
+
+def find_ffmpeg() -> str | None:
+    """ffmpeg suchen: zuerst neben der App (Windows-App bringt es mit), dann im System."""
+    bases = [Path(sys.executable).parent, Path(__file__).parent]
+    if hasattr(sys, "_MEIPASS"):
+        bases.insert(0, Path(sys._MEIPASS))
+    for base in bases:
+        for name in ("ffmpeg.exe", "ffmpeg"):
+            if (base / "ffmpeg" / name).is_file():
+                return str(base / "ffmpeg")
+    return shutil.which("ffmpeg")
 
 
 def check_url(url: str) -> str:
@@ -83,15 +96,18 @@ def _options(fmt: str, out_dir: Path) -> dict:
 
 def download(url: str, fmt: str = "mp4", out_dir: Path | str = DEFAULT_OUT) -> Path:
     """Laedt den Link herunter und gibt den Pfad der fertigen Datei zurueck."""
-    if shutil.which("ffmpeg") is None:
+    ffmpeg = find_ffmpeg()
+    if ffmpeg is None:
         raise DownloadError("ffmpeg wurde nicht gefunden. Bitte installieren (siehe README).")
     url = check_url(url)
     fmt = fmt.lower()
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    opts = _options(fmt, out_dir)
+    opts["ffmpeg_location"] = ffmpeg
     try:
-        with yt_dlp.YoutubeDL(_options(fmt, out_dir)) as ydl:
+        with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=True)
             if info.get("_type") == "playlist" and info.get("entries"):
                 info = info["entries"][0]
@@ -102,6 +118,13 @@ def download(url: str, fmt: str = "mp4", out_dir: Path | str = DEFAULT_OUT) -> P
         msg = str(e).replace("ERROR: ", "")
         if "DRM" in msg:
             msg = "Dieses Video ist kopiergeschuetzt (DRM) und kann nicht geladen werden."
+        elif "Sign in" in msg or "login" in msg.lower():
+            msg = "Dieser Inhalt ist privat oder braucht einen Login und kann nicht geladen werden."
+        else:
+            msg += (
+                "\n\nTipp: Plattformen aendern sich oft. Lade die neueste Version"
+                " von Watcher.net herunter, das behebt die meisten Fehler."
+            )
         raise DownloadError(msg) from e
 
     if not path.exists():

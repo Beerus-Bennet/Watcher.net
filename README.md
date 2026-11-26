@@ -1,70 +1,67 @@
 # Watcher.net
 
-<img src="static/icons/icon-512-rounded.png" alt="Watcher.net Icon" width="128">
+<img src="static/icons/icon-512-rounded.png" alt="Watcher.net Icon" width="110">
 
-Link von YouTube, Instagram Reels oder TikTok einfügen und als **MP3** (Audio) oder **MP4** (Video) in der besten verfügbaren Qualität speichern. Läuft lokal auf deinem Rechner, mit einer kleinen Oberfläche im Browser.
+Link von **YouTube**, **Instagram Reels** oder **TikTok** einfügen, auf *Herunterladen* klicken, fertig. Du bekommst die Datei als **MP3** (nur Ton) oder **MP4** (Video) in der besten verfügbaren Qualität.
+
+![So sieht Watcher.net aus](docs/screenshot.png)
+
+## So geht's (Windows)
+
+1. **[Watcher.exe herunterladen](https://github.com/Beerus-Bennet/watcher.net/releases/latest/download/Watcher.exe)**
+2. **Doppelklick** auf `Watcher.exe`. Dein Browser öffnet sich mit der Seite oben.
+3. **Link einfügen**, MP3 oder MP4 wählen, auf **Herunterladen** klicken.
+
+Die fertigen Dateien liegen im Ordner **Downloads › Watcher.net**.
+
+Du musst sonst nichts installieren. Zum Beenden das schwarze Fenster schließen, das beim Start mit aufgeht.
+
+**Windows-Warnung beim ersten Start?** Wenn „Der Computer wurde durch Windows geschützt“ erscheint: auf **Weitere Informationen** und dann auf **Trotzdem ausführen** klicken. Das kommt, weil die App neu und nicht kostenpflichtig signiert ist.
+
+**Funktioniert ein Link nicht mehr?** YouTube und Co. ändern sich oft. Einfach die neueste `Watcher.exe` über den Link oben herunterladen. Sie wird jede Woche automatisch neu gebaut.
 
 > Nur für den privaten Gebrauch und nur für Inhalte, an denen du die Rechte hast oder deren Download erlaubt ist. Kopiergeschützte Dienste wie Netflix, Disney+ oder Spotify werden bewusst nicht unterstützt.
 
-## Voraussetzungen
+---
 
-- **Python 3.10 oder neuer**: https://www.python.org/downloads/ (unter Windows beim Installieren „Add Python to PATH“ anhaken)
-- **ffmpeg** (zum Zusammenfügen und Umwandeln):
-  - Windows: `winget install ffmpeg`
-  - macOS: `brew install ffmpeg`
-  - Linux: `sudo apt install ffmpeg`
+## Für Fortgeschrittene
 
-## Starten
+<details>
+<summary>Auf dem Handy nutzen</summary>
 
-- **Windows:** Doppelklick auf `start.bat`
-- **macOS/Linux:** `./start.sh`
+Watcher.net läuft auf deinem Computer, das Handy kann es im selben WLAN mitbenutzen.
 
-Beim ersten Start werden die Pakete installiert. Danach öffnet sich der Browser auf http://127.0.0.1:5000. Link einfügen, MP3 oder MP4 wählen, fertig.
+1. Watcher mit dem Zusatz `--handy` starten (z. B. Verknüpfung zu `Watcher.exe` anlegen und im Feld *Ziel* hinten ` --handy` ergänzen).
+2. Im schwarzen Fenster steht eine Adresse wie `http://192.168.0.23:5000`. Diese auf dem Handy öffnen.
+3. **iPhone:** Teilen › „Zum Home-Bildschirm“. **Android:** Menü (⋮) › „Zum Startbildschirm hinzufügen“.
 
-Die Dateien landen in `Downloads/Watcher.net`.
+Watcher.net erscheint dann mit eigenem Icon wie eine App. Der Computer muss dafür laufen. Mit `--handy` ist die Seite für alle Geräte im WLAN erreichbar, also nur im eigenen Heimnetz verwenden.
+</details>
 
-## Auf dem Handy nutzen
+<details>
+<summary>Mac / Linux oder aus dem Quellcode starten</summary>
 
-1. Auf dem Computer mit `start.bat --handy` (Windows) bzw. `./start.sh --handy` (Mac/Linux) starten.
-2. Im Fenster steht eine Adresse wie `http://192.168.0.23:5000`. Diese auf dem Handy öffnen (gleiches WLAN).
-3. **iPhone:** Teilen → „Zum Home-Bildschirm“. **Android:** Menü (⋮) → „Zum Startbildschirm hinzufügen“.
-
-Watcher.net erscheint dann mit eigenem Icon wie eine App. Heruntergeladene Dateien kannst du über „Datei öffnen“ direkt aufs Handy laden. Der Computer muss dafür laufen.
-
-> Mit `--handy` ist die Seite für alle Geräte im WLAN erreichbar. Nur im eigenen Heimnetz verwenden.
-
-## Kommandozeile (optional)
+Voraussetzungen: [Python 3.10+](https://www.python.org/downloads/) und ffmpeg (`brew install ffmpeg` bzw. `sudo apt install ffmpeg`).
 
 ```bash
-python cli.py "https://www.youtube.com/watch?v=..." mp3
-python cli.py "https://www.tiktok.com/@user/video/..." mp4 -o ./meine-videos
+./start.sh            # Mac/Linux
+start.bat             # Windows ohne die fertige App
+python cli.py "https://www.youtube.com/watch?v=..." mp3   # ohne Oberfläche
 ```
+</details>
 
-## Was „beste Qualität“ heißt
+<details>
+<summary>Was „beste Qualität“ heißt</summary>
 
-- **MP4:** bestes Video plus beste Tonspur, zusammengefügt. Das Video wird nicht neu kodiert. Die Tonspur wird in AAC umgewandelt, damit die Datei auf jedem Gerät abspielt.
-- **MP3:** beste Tonspur, umgewandelt in MP3 mit höchster Qualitätsstufe (VBR V0), mit Titel und Vorschaubild. Hinweis: Die Originalspur ist meist Opus oder AAC, MP3 ist also immer eine Umwandlung.
+- **MP4:** bestes Video plus beste Tonspur, zusammengefügt. Das Bild wird nicht neu kodiert. Der Ton wird in AAC umgewandelt, damit die Datei auf jedem Gerät abspielt.
+- **MP3:** beste Tonspur, umgewandelt in MP3 mit höchster Qualitätsstufe (VBR V0), mit Titel und Vorschaubild.
+</details>
 
-## Wenn etwas nicht klappt
+<details>
+<summary>Technik, Icons, Lizenz</summary>
 
-Plattformen ändern sich oft. Die Startskripte aktualisieren `yt-dlp` bei jedem Start automatisch, das behebt die meisten Fehler. Private Videos und manche Instagram-Inhalte brauchen einen Login und funktionieren derzeit nicht.
-
-## Icons
-
-Alle Größen liegen in `static/icons/` (Quelle: `icon.svg`):
-
-| Datei | Größe | Wofür |
-|---|---|---|
-| `favicon.ico` | 16, 32, 48 | Browser-Tab |
-| `apple-touch-icon.png` | 180×180 | iPhone/iPad Home-Bildschirm |
-| `icon-192.png`, `icon-512.png` | 192, 512 | Android / installierte Web-App |
-| `icon-maskable-192.png`, `icon-maskable-512.png` | 192, 512 | Android (runde/abgerundete Formen) |
-| `icon-512-rounded.png` | 512 | README, Vorschau |
-
-## Herunterladen
-
-Oben auf GitHub auf **Code → Download ZIP** klicken, entpacken, dann wie unter „Starten“ beschrieben loslegen. Mit Git: `git clone https://github.com/Beerus-Bennet/watcher.net.git`
-
-## Lizenz
-
-MIT, siehe [LICENSE](LICENSE).
+- Basiert auf [yt-dlp](https://github.com/yt-dlp/yt-dlp) und [ffmpeg](https://ffmpeg.org). Die Windows-App bringt ffmpeg (GPL, Build von [BtbN](https://github.com/BtbN/FFmpeg-Builds)) als eigenständiges Programm mit.
+- Die Windows-App wird von GitHub Actions gebaut (`.github/workflows/windows-app.yml`): bei jeder Änderung und jeden Montag.
+- Icons in allen Größen liegen in `static/icons/` (Quelle `icon.svg`): Favicon 16–48, iPhone 180, Android 192/512 inkl. „maskable“, Windows-Icon in `packaging/watcher.ico`.
+- Lizenz: MIT, siehe [LICENSE](LICENSE).
+</details>
